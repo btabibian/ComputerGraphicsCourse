@@ -24,11 +24,11 @@ class Vector3f {
 
 	float _item[3];
 
-	public:
+public:
 
 	float & operator [] (int i) {
 		return _item[i];
-    	}
+	}
 
 	Vector3f(float x, float y, float z) 
 	{  _item[0] = x ; _item[1] = y ; _item[2] = z; };
@@ -64,7 +64,7 @@ ostream & operator << (ostream & stream, Vector3f & obj)
 
 
 class Triangle {
-friend class TriangleMesh;
+	friend class TriangleMesh;
 
 	int _vertex[3];
 public:
@@ -72,7 +72,7 @@ public:
 	Triangle(int v1, int v2, int v3) 
 	{
 		_vertex[0] = v1;  _vertex[1] = v2;  _vertex[2] = v3;  
-		
+
 	};
 };
 
@@ -101,6 +101,42 @@ class TriangleMesh
 	vector <Triangle> _trig;
 	float _xmax, _xmin, _ymax, _ymin, _zmin, _zmax;
 private:
+	void drawLineMidPoint(Vector3f & v1,Vector3f & v2)
+	{
+		//implementation based on Wikipedia
+		int i=0;
+		int x1=(int)v1[0];
+		int x2=(int)v2[0];
+		int y1=(int)v1[1];
+		int y2=(int)v2[1];
+
+		int dx = abs(x2-x1);
+		int dy = abs(y2-y1) ;
+		int sx,sy;
+		if (x1 < x2) sx = 1; else sx = -1;
+		if (y1 < y2) sy = 1; else sy = -1;
+		int err = dx-dy;
+ 
+   while(true)
+   {
+     glBegin(GL_POINTS);
+	 glVertex2i(x1,y1);
+	 glEnd();
+     if ((x1 == x2)&&( y1 == y2)) break;
+     int e2 = 2*err;
+     if (e2 > -dy) 
+       {
+		err = err - dy;
+       x1 = x1 + sx;
+	 }
+     if (e2 <  dx) 
+	 {
+       err = err + dx;
+       y1 = y1 + sy ;
+	 }
+   }
+
+	}
 	void drawLineDDA(Vector3f & v1,Vector3f & v2)
 	{
 		int i=0;
@@ -119,9 +155,9 @@ private:
 		float y=y1;
 		for(;n>0;n--)
 		{
-		glVertex2f(x,y);
-		x+=dxdt;
-		y+=dydt;
+			glVertex2f(x,y);
+			x+=dxdt;
+			y+=dydt;
 		}
 		glEnd();
 	}
@@ -140,21 +176,21 @@ public:
 		v2 = _v[_trig[i]._vertex[1]]; 
 		v3 = _v[_trig[i]._vertex[2]]; 
 	}
-	
+
 	void drawTriangleVertices(int i)
 	{
 		Vector3f v1,v2,v3;
 		v1 = _v[_trig[i]._vertex[0]]; 
 		v2 = _v[_trig[i]._vertex[1]]; 
 		v3 = _v[_trig[i]._vertex[2]];
-		drawLineDDA(v1,v2);
-		drawLineDDA(v2,v3);
-		drawLineDDA(v3,v1);
+		drawLineMidPoint(v1,v2);
+		drawLineMidPoint(v2,v3);
+		drawLineMidPoint(v3,v1);
 
 
 
 	}
-			
+
 };
 
 #endif //_rt_H
